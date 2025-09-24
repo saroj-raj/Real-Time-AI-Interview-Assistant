@@ -1,0 +1,37 @@
+# Core dependencies for Real-Time AI Interview Assistant
+
+# Audio processing and recording
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# Speech-to-text (Whisper)
+faster-whisper>=0.10.0
+
+# HTTP requests for Ollama API
+requests>=2.31.0
+
+# Optional: Enhanced audio processing (uncomment if needed)
+# librosa>=0.10.0
+# soundfile>=0.12.0
+
+# Optional: Better console output (uncomment if needed)
+# rich>=13.0.0
+# colorama>=0.4.6
+
+# Development and debugging (optional)
+# pytest>=7.4.0
+# black>=23.0.0
+# isort>=5.12.0
+
+# System requirements notes:
+# - Python 3.8 or higher required
+# - FFmpeg required for faster-whisper (auto-installed on most systems)
+# - Ollama must be installed separately (see README.md)
+# - For Windows: Microsoft Visual C++ 14.0 or greater may be required
+# - For macOS: Xcode command line tools may be required
+# - For Linux: build-essential package may be required
+
+# Memory recommendations by model:
+# - codellama:7b-instruct-q4_0: 4GB+ RAM  
+# - mistral:7b: 6GB+ RAM
+# - llama3.1:8b: 8GB+ RAM
