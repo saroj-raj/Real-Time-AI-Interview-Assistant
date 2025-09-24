@@ -1,363 +1,321 @@
 # Real-Time AI Interview Assistant
 
-A sophisticated AI-powered interview assistant that provides real-time responses to technical interview questions. Built specifically for Agentic AI Engineer positions with comprehensive LLM evaluation expertise.
+A comprehensive AI-powered interview practice system that provides personalized, context-aware responses based on your professional background and target roles. Features real-time audio capture, transcription, and streaming LLM responses optimized for technical interviews.
 
 ## Features
 
-- **Real-Time Audio Processing**: Captures system audio or microphone input
-- **Speech-to-Text**: Uses Whisper for accurate transcription
-- **Intelligent Response Generation**: Leverages Ollama LLMs for contextual interview responses
-- **Modular Architecture**: Separates generic LLM client from personal profile data
-- **Comprehensive Technical Knowledge**: Covers Agentic AI, LLM evaluation, RAG systems, and more
-- **Production-Ready**: Handles errors gracefully with intelligent fallbacks
+### Core Capabilities
+- **Real-time Audio Processing**: Manual start/stop recording with Whisper transcription
+- **Profile-Based Responses**: Personalized answers based on your experience and target role
+- **Streaming LLM Integration**: Local Ollama inference with real-time word wrapping
+- **Job Description Alignment**: Responses tailored to specific job requirements
+- **Multi-User Support**: Individual profiles for different users and roles
+- **Cross-Platform Audio**: Windows WASAPI loopback and virtual audio device support
+
+### Technical Features
+- **Modular Architecture**: Clean separation between core components and user profiles
+- **Audio Device Detection**: Automatic system audio and virtual device detection
+- **Response Interruption**: Space key to stop LLM generation mid-response
+- **Session Management**: Question numbering and interview flow control
+- **Error Handling**: Comprehensive fallback mechanisms and error recovery
 
 ## Architecture
 
+### System Design
 ```
-├── main.py                 # Main application entry point
-├── ollama_client.py        # Generic Ollama LLM client
-├── interview_profile.py    # Personal background and responses
-├── llm_client.py           # Integration layer (backward compatibility)
-├── audio_device_util.py    # Audio device detection and management
-├── audio_transcriber.py    # Whisper integration for speech-to-text
-├── requirements.txt        # Python dependencies
-└── README.md              # This file
-```
-
-## Prerequisites
-
-### 1. Ollama Installation
-
-Install Ollama on your system:
-
-**Windows/Mac/Linux:**
-```bash
-# Download from https://ollama.ai/
-curl -fsSL https://ollama.ai/install.sh | sh
+Real-TimeAIInterviewAssistant/
+├── main.py                    # Main application with profile selection
+├── profiles/                  # User and role profiles
+│   └── [user_name]/
+│       ├── [role_name].py
+│       └── [role_name]_job_description.txt
+├── src/core/                  # Generic components
+│   ├── ollama_client.py       # LLM interface
+│   ├── audio_transcriber.py   # Whisper integration
+│   └── audio_device_util.py   # Audio device management
+├── my_context.txt            # General context file
+├── job_description.txt       # Global job description fallback
+└── requirements.txt
 ```
 
-**Pull a recommended model:**
-```bash
-# Best for memory-constrained systems (3.8GB)
-ollama pull codellama:7b-instruct-q4_0
-
-# Alternative models
-ollama pull mistral:7b          # 4.4GB
-ollama pull llama3.1:8b         # 4.9GB (requires ~6GB RAM)
-```
-
-### 2. Audio Setup
-
-**Option A: WASAPI Loopback (Recommended for Windows)**
-- Automatically captures system audio from speakers/headphones
-- No additional setup required
-
-**Option B: Virtual Audio Cable**
-- Download VB-Audio CABLE or Voicemeeter
-- Route interview audio through virtual device
-
-**Option C: Physical Microphone**
-- Use built-in microphone to pick up audio from speakers
-- Less reliable but works as fallback
+### Technology Stack
+- **Audio**: OpenAI Whisper for transcription, sounddevice for capture
+- **LLM**: Ollama for local inference (privacy-focused)
+- **Language**: Python 3.8+ with minimal dependencies
+- **Architecture**: Streaming responses with real-time processing
 
 ## Installation
 
-1. **Clone the repository:**
+### Prerequisites
+- Python 3.8 or higher
+- Ollama installed and running
+- Audio input device (microphone or system audio setup)
+
+### Step 1: Clone Repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-username/Real-TimeAIInterviewAssistant.git
 cd Real-TimeAIInterviewAssistant
 ```
 
-2. **Create virtual environment:**
+### Step 2: Create Virtual Environment
 ```bash
 python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Mac/Linux
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-3. **Install dependencies:**
+### Step 3: Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Verify Ollama is running:**
+### Step 4: Install and Setup Ollama
 ```bash
-ollama serve  # If not already running
-ollama list   # Check available models
+# Install Ollama from https://ollama.com
+# Pull a recommended model
+ollama pull codellama:7b-instruct-q4_0
 ```
 
-## Configuration
+### Step 5: Create Your Profile
+See [profiles/README.md](profiles/README.md) for detailed profile setup instructions.
 
-### Environment Variables (Optional)
-
-```bash
-# Set preferred model
-export OLLAMA_MODEL="codellama:7b-instruct-q4_0"
-
-# Set Ollama URL (if running on different host)
-export OLLAMA_URL="http://localhost:11434"
-
-# Force specific audio device
-export FORCE_DEVICE_INDEX="5"
-
-# Custom context file
-export CONTEXT_FILE="my_custom_context.txt"
-
-# Custom job description file
-export JOB_DESCRIPTION_FILE="my_job_description.txt"
-```
-
-### Context Files (Optional)
-
-Create these files to provide additional context:
-
-**my_context.txt** - Additional personal background
-```
-Additional technical experience, projects, or context
-that should be included in responses...
-```
-
-**job_description.txt** - Target job description
-```
-Paste the job description you're interviewing for
-to get more targeted responses...
-```
-
-## Usage
+## Quick Start
 
 ### Basic Usage
-
-1. **Start the application:**
 ```bash
 python main.py
 ```
 
-2. **Follow the initialization:**
+The application will:
+1. Display available users and roles
+2. Load your profile and job description
+3. Initialize audio devices and models
+4. Start the interview session
+
+### Interview Controls
+- **ENTER**: Start/stop recording
+- **SPACE**: Interrupt AI response generation
+- **CTRL+C**: Exit application
+
+### Example Session Flow
 ```
-AI Interview Assistant - Initializing...
-============================================================
-✓ Context: 150 words loaded
-✓ Job Description: 200 words loaded
+[Q1] Press ENTER to start recording...
+🔴 RECORDING... (Press ENTER to stop)
+⏹ Stopped (5.2s)
+⚡ Transcribing...
 
---- Audio Setup ---
-Device: Speakers (Realtek Audio)
-Mode: WASAPI speaker loopback
-Rate: 48000Hz
+🎤 QUESTION:
+Tell me about your experience with distributed systems.
 
---- Model Loading ---
-Loading Whisper... ✓
-Loading LLM... ✓
-
-READY FOR INTERVIEW
-============================================================
-Controls:
-• Press ENTER to START recording
-• Press ENTER again to STOP recording  
-• Press SPACE during AI response to interrupt
-• Press CTRL+C to exit
-============================================================
+🤖 RESPONSE:
+Based on my experience as a Senior Software Engineer, I've worked extensively 
+with distributed systems at scale...
 ```
 
-3. **During interview:**
-   - Press ENTER to start recording a question
-   - Press ENTER again to stop recording
-   - Wait for transcription and AI response
-   - Press SPACE to interrupt long responses
-   - Continue for next question
+## Configuration
 
-### Advanced Usage
+### Audio Setup
 
-**Test specific model:**
+#### Windows - System Audio Capture
+For capturing computer audio (not microphone):
+1. **Option A**: Use PyAudioWPatch for WASAPI loopback
+2. **Option B**: Install VB-Audio Virtual Cable
+3. **Option C**: Enable "Stereo Mix" in sound settings
+
+#### macOS - Virtual Audio Device
 ```bash
-OLLAMA_MODEL="mistral:7b" python main.py
+# Install BlackHole virtual audio device
+brew install blackhole-2ch
+
+# Create Multi-Output Device in Audio MIDI Setup
+# Set as system output, record from BlackHole input
 ```
 
-**Debug audio devices:**
+#### Linux - PulseAudio Monitor
 ```bash
-python audio_device_util.py
+# List audio sources
+pactl list sources short
+
+# Find monitor devices (usually end with .monitor)
+# Use monitor device index in application
 ```
 
-**Test LLM connection:**
+### Model Configuration
+
+#### Supported Models
+- `codellama:7b-instruct-q4_0` (recommended, 4GB RAM)
+- `mistral:7b` (alternative, 4GB RAM)
+- `llama3.1:8b` (higher quality, 6GB RAM)
+
+#### Model Selection
+Set via environment variable:
 ```bash
-python llm_client.py
+export OLLAMA_MODEL="codellama:7b-instruct-q4_0"
 ```
 
-## Supported Interview Topics
-
-The assistant is trained on comprehensive technical knowledge including:
-
-### Agentic AI & Multi-Agent Systems
-- LangChain, CrewAI, LangGraph, AutoGen frameworks
-- Planner-Executor patterns and goal-oriented agents
-- Tool-augmented reasoning and contextual memory
-- Multi-agent orchestration and collaboration
-
-### LLM Evaluation & Scoring  
-- RAGAS framework implementation
-- Faithfulness, Answer Relevancy, Context Precision metrics
-- A/B testing and benchmark scoring
-- Custom evaluation pipelines
-
-### Retrieval-Augmented Generation (RAG)
-- Vector databases: Pinecone, Weaviate, Milvus, FAISS
-- Embedding optimization and semantic search
-- Multi-modal RAG for text, PDFs, images
-- Context windowing and chunk strategies
-
-### Production ML & MLOps
-- Cloud platforms: AWS SageMaker, Azure OpenAI, GCP Vertex AI
-- Containerization with Docker and Kubernetes
-- CI/CD pipelines and monitoring
-- Model serving and scaling strategies
-
-### Large Language Models
-- Fine-tuning with domain-specific datasets
-- Prompt engineering (few-shot, CoT, ReAct)
-- LLM deployment and optimization
-- Multi-modal model integration
-
-## Customization
-
-### Personal Profile Modification
-
-Edit `interview_profile.py` to customize:
-
+Or modify in profile file:
 ```python
-# Personal Information
-self.name = "Your Name"
-self.role = "Your Role"
-self.experience_years = 5
-
-# Technical Expertise
-self.agentic_ai_expertise = [
-    "Your specific frameworks and tools",
-    # ... add your expertise
-]
-
-# Work Experience
-self.work_experience = [
-    {
-        "role": "Your Role",
-        "company": "Your Company", 
-        "duration": "Start - End",
-        "key_projects": ["Your achievements"]
-    }
-]
+# In your profile
+self.model = "mistral:7b"
 ```
 
-### Model Selection
+## Profile System
 
-The system automatically selects the best available model based on your memory:
+### Profile Structure
+Each profile represents a specific user in a specific role:
+- **User Directory**: `profiles/[username]/`
+- **Role File**: `[role_name].py` containing experience and background
+- **Job Description**: `[role_name]_job_description.txt` with target role requirements
 
-1. **codellama:7b-instruct-q4_0** (3.8GB) - Recommended for most systems
-2. **mistral:7b** (4.4GB) - Good alternative
-3. **llama3.1:8b** (4.9GB) - Best quality, requires more memory
+### Creating Profiles
+1. Copy template from `profiles/template/`
+2. Customize personal information and experience
+3. Add corresponding job description file
+4. Ensure profile has `make_llm()` function
+
+See [profiles/README.md](profiles/README.md) for complete setup guide.
+
+## Job Description Integration
+
+### Priority Order
+1. `profiles/[user]/[role]_job_description.txt` (role-specific)
+2. `profiles/[user]/job_descriptions/[role].txt` (organized folder)
+3. `job_descriptions/[role].txt` (global by role)
+4. `job_description.txt` (global fallback)
+
+### Best Practices
+- Include specific technical requirements
+- List key responsibilities and skills
+- Mention company context and values
+- Keep concise but comprehensive (500-1000 words)
+
+## Advanced Features
 
 ### Response Customization
+Profiles support sophisticated prompt engineering:
+- Experience-based response grounding
+- Question-type specific instructions
+- Technical depth adjustment
+- STAR method formatting
 
-Modify fallback responses in `interview_profile.py`:
+### Error Handling
+- Comprehensive fallback responses
+- Audio device failure recovery
+- LLM connection error handling
+- Graceful degradation modes
 
-```python
-def _get_comprehensive_fallback(self, question: str) -> str:
-    # Customize responses based on question type
-    if "your_specific_topic" in question.lower():
-        return "Your customized response..."
-```
+### Performance Optimization
+- Streaming response generation
+- Real-time word wrapping
+- Audio buffer management
+- Memory-efficient processing
 
 ## Troubleshooting
 
 ### Common Issues
 
-**1. "Model requires more system memory" error**
+#### Audio Problems
+**No audio captured**:
+- Check audio device selection
+- Verify microphone permissions
+- Test with different audio devices
+- Review system audio settings
+
+**System audio not working**:
+- Install virtual audio cable
+- Configure WASAPI loopback (Windows)
+- Setup PulseAudio monitors (Linux)
+- Use BlackHole (macOS)
+
+#### LLM Issues
+**Model not loading**:
 ```bash
-# Use smaller model
-export OLLAMA_MODEL="codellama:7b-instruct-q4_0"
-```
+# Check Ollama status
+ollama list
 
-**2. Audio device not detected**
-```bash
-# List all devices
-python audio_device_util.py
+# Pull model if missing
+ollama pull codellama:7b-instruct-q4_0
 
-# Force specific device
-export FORCE_DEVICE_INDEX="3"
-```
-
-**3. Ollama connection failed**
-```bash
-# Check if Ollama is running
-ollama serve
-
-# Test connection
+# Verify Ollama service
 curl http://localhost:11434/api/tags
 ```
 
-**4. Poor transcription quality**
-- Increase audio volume
-- Reduce background noise
-- Use headphones instead of speakers
-- Check microphone placement
+**Out of memory errors**:
+- Use smaller model (codellama:7b vs llama3.1:8b)
+- Close other applications
+- Check available RAM
+- Reduce context window in profile
 
-**5. Generic fallback responses**
-- Ensure Ollama model is loaded: `ollama list`
-- Check memory usage
-- Try smaller model
-- Verify network connection to Ollama
+#### Profile Issues
+**Profile not found**:
+- Verify file path and naming
+- Check `make_llm()` function exists
+- Validate Python syntax
+- Review profile structure
 
-### Performance Optimization
+### System Requirements
 
-**For better response speed:**
-```python
-# In interview_profile.py, reduce context size
-"num_ctx": 2048,  # Reduce from 4096
-"num_predict": 400,  # Reduce from 800
-```
+#### Minimum
+- 4GB RAM
+- 2GB free disk space
+- Python 3.8+
+- Audio input device
 
-**For better accuracy:**
-```python
-# Use larger model if memory allows
-export OLLAMA_MODEL="llama3.1:8b"
-```
+#### Recommended
+- 8GB RAM
+- 5GB free disk space
+- Python 3.10+
+- Dedicated microphone or virtual audio setup
 
-## System Requirements
+## Development
 
-- **Memory**: 4GB RAM minimum, 8GB recommended
-- **Storage**: 5GB free space for models
-- **CPU**: Modern multi-core processor
-- **Audio**: Microphone or system audio access
-- **OS**: Windows 10+, macOS 10.14+, or Linux
-
-## Model Recommendations by System
-
-| RAM Available | Recommended Model | Performance |
-|---------------|------------------|-------------|
-| 4-6 GB | codellama:7b-instruct-q4_0 | Good |
-| 6-8 GB | mistral:7b | Better |
-| 8+ GB | llama3.1:8b | Best |
-
-## Contributing
-
+### Contributing
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Create Pull Request
+2. Create feature branch
+3. Follow existing code style
+4. Add comprehensive tests
+5. Update documentation
+6. Submit pull request
+
+### Code Structure
+- `main.py`: Application entry point and interview loop
+- `src/core/`: Generic, reusable components
+- `profiles/`: User-specific configurations
+- Focus on modularity and maintainability
+
+### Testing
+```bash
+# Run basic setup test
+python test_setup.py
+
+# Test audio devices
+python -c "import sounddevice as sd; print(sd.query_devices())"
+
+# Test Ollama connection
+python -c "from src.core.ollama_client import OllamaClient; print(OllamaClient('codellama:7b-instruct-q4_0').is_working())"
+```
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT License - see LICENSE file for details.
 
-## Acknowledgments
+## Support
 
-- **Ollama** for local LLM inference
-- **OpenAI Whisper** for speech-to-text
-- **Hugging Face** for model ecosystem
-- **LangChain** framework inspiration for agent patterns
+### Documentation
+- [Profile Setup Guide](profiles/README.md)
+- [Audio Configuration Guide](docs/audio-setup.md)
+- [Troubleshooting Guide](docs/troubleshooting.md)
 
-## Contact
+### Community
+- GitHub Issues: Bug reports and feature requests
+- GitHub Discussions: Questions and community support
 
-For questions or support, please open an issue in the repository.
+### Technical Support
+For technical issues:
+1. Check troubleshooting section
+2. Review system requirements
+3. Test individual components
+4. Create detailed issue report
+
+---
+
+**Note**: This system processes audio and personal information locally. No data is transmitted to external servers when using local Ollama models.
