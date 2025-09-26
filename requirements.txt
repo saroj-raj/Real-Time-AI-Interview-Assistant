@@ -35,3 +35,8 @@ requests>=2.31.0
 # - codellama:7b-instruct-q4_0: 4GB+ RAM  
 # - mistral:7b: 6GB+ RAM
 # - llama3.1:8b: 8GB+ RAM
+
+
+# Quality control enhancements
+dataclasses; python_version < '3.7'
+typing-extensions
