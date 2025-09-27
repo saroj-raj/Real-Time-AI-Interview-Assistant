@@ -23,7 +23,7 @@ def load_whisper(model_size: str = None) -> WhisperModel:
     global _model_singleton
     with _model_lock:
         if _model_singleton is None:
-            size = model_size or "small"  # Use small for better accuracy
+            size = model_size or "large"  # Use large for better accuracy
             print(f"Loading Whisper model: {size}")
             _model_singleton = WhisperModel(size, device="cpu", compute_type="int8")
         return _model_singleton
