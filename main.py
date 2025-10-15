@@ -269,9 +269,9 @@ def show_startup_info():
     # Audio setup
     print("\n--- Audio Setup ---")
     device_pick = pick_system_audio_device(prefer_rate=48000)
-    print(f"Device: {device_pick.name}")
+    device_short = device_pick.name[:50] + "..." if len(device_pick.name) > 50 else device_pick.name
+    print(f"Selected: {device_short}")
     print(f"Mode: {'Loopback' if device_pick.wasapi_loopback else 'Virtual Input'}")
-    print(f"Rate: {device_pick.samplerate}Hz")
     
     # Model loading
     print("\n--- Model Loading ---")
