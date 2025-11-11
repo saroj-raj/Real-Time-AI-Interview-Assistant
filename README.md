@@ -2,6 +2,14 @@
 
 A comprehensive AI-powered interview practice system that provides personalized, context-aware responses based on your professional background and target roles. Features real-time audio capture, transcription, and streaming LLM responses optimized for technical interviews.
 
+> **🚀 Project Status**: Currently transitioning from CLI prototype to production-ready mobile-first web application.
+>
+> **📚 Documentation**:
+> - **[ROADMAP.md](ROADMAP.md)** - Comprehensive 5-phase development plan (Frontend → Backend → Quality → Deployment → Mobile)
+> - **[RULES.md](RULES.md)** - Development guidelines and best practices for contributors
+> - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture, data flow, and technical design
+> - **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute (coming soon)
+
 ## Features
 
 ### Core Capabilities
@@ -363,19 +371,49 @@ For technical issues:
 
 ---
 
-## Recent Updates (November 2025)
+## 🚀 Getting Started
+
+### For Current CLI Version
+See installation and setup instructions above.
+
+### For New Web Application Development
+**Ready to contribute to the mobile-first web app?**
+
+👉 **[Start Here: QUICKSTART.md](QUICKSTART.md)** - Step-by-step guide for Phase 1 frontend development
+
+This guide includes:
+- Next.js project setup
+- Component examples (RecordButton, TranscriptDisplay)
+- Hooks for audio recording
+- Mobile-first responsive design
+- Development workflow
+
+---
+
+## 📖 Recent Updates (November 2025)
 
 ### ✨ New Features
 - **Dual LLM Support**: Groq API (cloud, fast) with automatic Ollama fallback (local, private)
 - **Unified LLM Client**: Single interface for both Groq and Ollama with intelligent routing
 - **Whisper Large Model**: Improved transcription accuracy with larger model
 - **Enhanced Profile System**: Support for Groq in profile configuration
+- **Comprehensive Documentation**: ROADMAP, RULES, ARCHITECTURE, and QUICKSTART guides
 
 ### 🔧 Improvements
 - Faster response generation with Groq API (sub-second first token)
 - Better error handling and fallback mechanisms
 - Cleaner codebase with removed experimental features
 - Updated documentation for dual LLM setup
+- Production-ready development guidelines
+
+### 🗺️ Development Roadmap
+- **Phase 1**: Mobile-first frontend (Next.js + TypeScript + Tailwind)
+- **Phase 2**: FastAPI backend + Firebase integration
+- **Phase 3**: Real-time processing & quality control
+- **Phase 4**: Cloud deployment & monitoring
+- **Phase 5**: React Native mobile app
+
+See [ROADMAP.md](ROADMAP.md) for detailed timeline and milestones.
 
 ### 🐛 Bug Fixes
 - Fixed audio device detection reliability
