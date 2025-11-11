@@ -7,10 +7,11 @@ A comprehensive AI-powered interview practice system that provides personalized,
 ### Core Capabilities
 - **Real-time Audio Processing**: Manual start/stop recording with Whisper transcription
 - **Profile-Based Responses**: Personalized answers based on your experience and target role
-- **Streaming LLM Integration**: Local Ollama inference with real-time word wrapping
+- **Streaming LLM Integration**: Cloud (Groq) or Local (Ollama) inference with real-time word wrapping
 - **Job Description Alignment**: Responses tailored to specific job requirements
 - **Multi-User Support**: Individual profiles for different users and roles
 - **Cross-Platform Audio**: Windows WASAPI loopback and virtual audio device support
+- **Dual LLM Support**: Fast cloud inference with Groq or privacy-focused local Ollama
 
 ### Technical Features
 - **Modular Architecture**: Clean separation between core components and user profiles
@@ -18,6 +19,7 @@ A comprehensive AI-powered interview practice system that provides personalized,
 - **Response Interruption**: Space key to stop LLM generation mid-response
 - **Session Management**: Question numbering and interview flow control
 - **Error Handling**: Comprehensive fallback mechanisms and error recovery
+- **Smart LLM Routing**: Automatic fallback from Groq to Ollama if API unavailable
 
 ## Architecture
 
@@ -39,8 +41,8 @@ Real-TimeAIInterviewAssistant/
 ```
 
 ### Technology Stack
-- **Audio**: OpenAI Whisper for transcription, sounddevice for capture
-- **LLM**: Ollama for local inference (privacy-focused)
+- **Audio**: OpenAI Whisper (large model) for transcription, sounddevice for capture
+- **LLM**: Groq API (fast cloud) or Ollama (local privacy) with intelligent fallback
 - **Language**: Python 3.8+ with minimal dependencies
 - **Architecture**: Streaming responses with real-time processing
 
@@ -48,7 +50,8 @@ Real-TimeAIInterviewAssistant/
 
 ### Prerequisites
 - Python 3.8 or higher
-- Ollama installed and running
+- **Option 1 (Recommended - Fast)**: Groq API key ([Get free key](https://console.groq.com))
+- **Option 2 (Local - Private)**: Ollama installed and running
 - Audio input device (microphone or system audio setup)
 
 ### Step 1: Clone Repository
@@ -68,12 +71,29 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Install and Setup Ollama
+### Step 4: Setup LLM (Choose One)
+
+**Option A: Groq API (Recommended - Faster)**
+```bash
+# Get free API key from https://console.groq.com
+# Set environment variable
+export GROQ_API_KEY="your_api_key_here"  # Linux/Mac
+# OR
+set GROQ_API_KEY=your_api_key_here  # Windows CMD
+# OR
+$env:GROQ_API_KEY="your_api_key_here"  # Windows PowerShell
+```
+
+**Option B: Ollama (Local - More Private)**
 ```bash
 # Install Ollama from https://ollama.com
 # Pull a recommended model
-ollama pull codellama:7b-instruct-q4_0
+ollama pull llama3.2:3b
+# OR
+ollama pull llama3.1:8b
 ```
+
+**The system automatically uses Groq if API key is set, otherwise falls back to Ollama.**
 
 ### Step 5: Create Your Profile
 See [profiles/README.md](profiles/README.md) for detailed profile setup instructions.
@@ -141,21 +161,27 @@ pactl list sources short
 
 ### Model Configuration
 
-#### Supported Models
-- `codellama:7b-instruct-q4_0` (recommended, 4GB RAM)
-- `mistral:7b` (alternative, 4GB RAM)
-- `llama3.1:8b` (higher quality, 6GB RAM)
+#### LLM Provider Selection
+The system uses **Groq by default** (if `GROQ_API_KEY` is set), otherwise **falls back to Ollama**.
 
-#### Model Selection
+**Groq Models** (Cloud - Fast):
+- `llama-3.2-3b-preview` (default, very fast)
+- `llama-3.1-8b-instant` (higher quality)
+- `mixtral-8x7b-32768` (best quality, longer context)
+
+**Ollama Models** (Local - Private):
+- `llama3.2:3b` (recommended, 2GB RAM)
+- `llama3.1:8b` (higher quality, 6GB RAM)
+- `mistral:7b` (alternative, 4GB RAM)
+
+#### Selecting LLM Provider
 Set via environment variable:
 ```bash
-export OLLAMA_MODEL="codellama:7b-instruct-q4_0"
-```
+# Use Groq (fast cloud)
+export GROQ_API_KEY="your_key"
 
-Or modify in profile file:
-```python
-# In your profile
-self.model = "mistral:7b"
+# Force Ollama (local) even if Groq key exists
+# Edit your profile and set use_groq=False in __init__
 ```
 
 ## Profile System
@@ -227,20 +253,33 @@ Profiles support sophisticated prompt engineering:
 - Use BlackHole (macOS)
 
 #### LLM Issues
-**Model not loading**:
+
+**Groq API errors**:
+```bash
+# Check API key is set
+echo $GROQ_API_KEY  # Should show your key
+
+# Test Groq connection
+curl -H "Authorization: Bearer $GROQ_API_KEY" https://api.groq.com/openai/v1/models
+
+# If Groq fails, system auto-falls back to Ollama
+```
+
+**Ollama - Model not loading**:
 ```bash
 # Check Ollama status
 ollama list
 
 # Pull model if missing
-ollama pull codellama:7b-instruct-q4_0
+ollama pull llama3.2:3b
 
 # Verify Ollama service
 curl http://localhost:11434/api/tags
 ```
 
 **Out of memory errors**:
-- Use smaller model (codellama:7b vs llama3.1:8b)
+- **With Groq**: No memory issues (cloud-based)
+- **With Ollama**: Use smaller model (llama3.2:3b vs llama3.1:8b)
 - Close other applications
 - Check available RAM
 - Reduce context window in profile
@@ -255,16 +294,19 @@ curl http://localhost:11434/api/tags
 ### System Requirements
 
 #### Minimum
-- 4GB RAM
+- 4GB RAM (with Groq)
+- 8GB RAM (with Ollama)
 - 2GB free disk space
 - Python 3.8+
 - Audio input device
+- Internet connection (for Groq) or none needed (for Ollama)
 
 #### Recommended
-- 8GB RAM
+- 8GB RAM (Groq) or 16GB RAM (Ollama with large models)
 - 5GB free disk space
 - Python 3.10+
 - Dedicated microphone or virtual audio setup
+- Stable internet (for Groq)
 
 ## Development
 
@@ -290,8 +332,11 @@ python test_setup.py
 # Test audio devices
 python -c "import sounddevice as sd; print(sd.query_devices())"
 
-# Test Ollama connection
-python -c "from src.core.ollama_client import OllamaClient; print(OllamaClient('codellama:7b-instruct-q4_0').is_working())"
+# Test Groq connection (if using Groq)
+python -c "from src.core.unified_llm_client import UnifiedLLMClient; c = UnifiedLLMClient('llama3.2:3b'); print('Provider:', c.get_provider())"
+
+# Test Ollama connection (if using Ollama)
+python -c "from src.core.ollama_client import OllamaClient; print(OllamaClient('llama3.2:3b').is_working())"
 ```
 
 ## License
@@ -318,4 +363,25 @@ For technical issues:
 
 ---
 
-**Note**: This system processes audio and personal information locally. No data is transmitted to external servers when using local Ollama models.
+## Recent Updates (November 2025)
+
+### ✨ New Features
+- **Dual LLM Support**: Groq API (cloud, fast) with automatic Ollama fallback (local, private)
+- **Unified LLM Client**: Single interface for both Groq and Ollama with intelligent routing
+- **Whisper Large Model**: Improved transcription accuracy with larger model
+- **Enhanced Profile System**: Support for Groq in profile configuration
+
+### 🔧 Improvements
+- Faster response generation with Groq API (sub-second first token)
+- Better error handling and fallback mechanisms
+- Cleaner codebase with removed experimental features
+- Updated documentation for dual LLM setup
+
+### 🐛 Bug Fixes
+- Fixed audio device detection reliability
+- Improved stream handling for both LLM providers
+- Better error messages for connection issues
+
+---
+
+**Note**: This system processes audio and personal information **locally by default** when using Ollama. When using Groq, data is sent to Groq's API for inference. Choose based on your privacy requirements.

@@ -16,14 +16,16 @@ _model_lock = threading.Lock()
 _model_singleton: Optional[WhisperModel] = None
 
 
-def load_whisper(model_size: str = None) -> WhisperModel:
+def load_whisper(model_size: str = "medium") -> WhisperModel:
     """
     Load Whisper model with stable defaults.
+    ALWAYS use 'base' for speed during interviews.
     """
     global _model_singleton
     with _model_lock:
         if _model_singleton is None:
-            size = model_size or "large"  # Use large for better accuracy
+            # FORCE base model - ignore anything else
+            size = "medium"
             print(f"Loading Whisper model: {size}")
             _model_singleton = WhisperModel(size, device="cpu", compute_type="int8")
         return _model_singleton
@@ -162,6 +164,7 @@ def record_until_enter(
 def transcribe_chunk(model: WhisperModel, audio_mono: np.ndarray, input_rate: int) -> str:
     """
     Transcribe audio chunk with proper preprocessing.
+    Optimized for speed with faster settings.
     """
     # Ensure we have the right shape
     if audio_mono.ndim == 2:
@@ -191,15 +194,20 @@ def transcribe_chunk(model: WhisperModel, audio_mono: np.ndarray, input_rate: in
     else:
         audio16 = audio.astype(np.float32)
 
-    # Transcribe with Whisper
+    # Transcribe with Whisper - OPTIMIZED FOR SPEED
     try:
         segments, info = model.transcribe(
             audio16,
             language="en",
             temperature=0.0,
-            beam_size=1,
-            best_of=1,
-            vad_filter=False,  # Keep consistent across versions
+            beam_size=1,      # Faster (was 5)
+            best_of=1,        # Faster (was 5)
+            vad_filter=True,  # Skip non-speech parts
+            vad_parameters=dict(
+                threshold=0.5,
+                min_speech_duration_ms=250,
+                min_silence_duration_ms=100,
+            ),
         )
         
         # Collect transcription text

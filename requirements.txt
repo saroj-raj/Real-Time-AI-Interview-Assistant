@@ -40,3 +40,12 @@ requests>=2.31.0
 # Quality control enhancements
 dataclasses; python_version < '3.7'
 typing-extensions
+
+# Web framework for potential future usev
+Flask==3.0.0
+flask-cors==4.0.0
+numpy>=1.24.0
+sounddevice>=0.4.6
+whisper
+torch
+torchaudio

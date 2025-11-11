@@ -15,7 +15,7 @@ from pathlib import Path
 # Add src/core to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src', 'core'))
 
-from audio_device_util import pick_system_audio_device, pretty_selection
+from audio_device_util import pick_system_audio_device
 from audio_transcriber import load_whisper, transcribe_chunk
 
 class WordWrapper:
@@ -33,33 +33,28 @@ class WordWrapper:
         self.buffer += token
         output = ""
         
-        # Process complete words (split on spaces)
         while ' ' in self.buffer or '\n' in self.buffer:
-            # Find the next word boundary
             space_pos = self.buffer.find(' ')
             newline_pos = self.buffer.find('\n')
             
             if newline_pos != -1 and (space_pos == -1 or newline_pos < space_pos):
-                # Handle newline
                 word = self.buffer[:newline_pos]
                 self.buffer = self.buffer[newline_pos + 1:]
                 
-                if word:  # Add word if not empty
+                if word:
                     result = self._add_word_to_line(word)
                     if result:
                         output += result
                 
-                # Force line break
-                if self.current_line.strip():  # Only if line has content
+                if self.current_line.strip():
                     output += self.current_line + '\n'
                 self._reset_line()
                 
             elif space_pos != -1:
-                # Handle space-separated word
                 word = self.buffer[:space_pos]
                 self.buffer = self.buffer[space_pos + 1:]
                 
-                if word:  # Add word if not empty
+                if word:
                     result = self._add_word_to_line(word)
                     if result:
                         output += result
@@ -67,12 +62,9 @@ class WordWrapper:
         return output
     
     def _add_word_to_line(self, word: str) -> str:
-        """Add word to current line, wrapping if necessary"""
         word_length = len(word)
         
-        # Check if word fits on current line (leave space for one space)
         if self.current_line_length + word_length + 1 <= self.width:
-            # Add word to current line
             if self.current_line:
                 self.current_line += " " + word
                 self.current_line_length += word_length + 1
@@ -81,33 +73,27 @@ class WordWrapper:
                 self.current_line_length = len(self.indent) + word_length
             return ""
         else:
-            # Need to wrap - finish current line and start new one
             output = ""
-            if self.current_line.strip():  # Only output if line has content
+            if self.current_line.strip():
                 output = self.current_line + '\n'
             
-            # Start new line with the word
             self.current_line = self.indent + word
             self.current_line_length = len(self.indent) + word_length
             return output
     
     def _reset_line(self):
-        """Reset current line"""
         self.current_line = ""
         self.current_line_length = len(self.indent)
     
     def flush(self) -> str:
-        """Flush any remaining content"""
         output = ""
         
-        # Add any remaining buffer content
         if self.buffer.strip():
             result = self._add_word_to_line(self.buffer.strip())
             if result:
                 output += result
             self.buffer = ""
         
-        # Output current line if it has content
         if self.current_line.strip():
             output += self.current_line + '\n'
             self._reset_line()
@@ -123,21 +109,17 @@ def select_profile():
     profiles_dir = Path("profiles")
     if not profiles_dir.exists():
         print("ERROR: No profiles directory found!")
-        print("Please create: ./profiles/your_name/your_role.py")
         return None, None, None
     
-    # Get available users
     users = []
     for item in profiles_dir.iterdir():
-        if item.is_dir() and not item.name.startswith('.'):
+        if item.is_dir() and not item.name.startswith('.') and not item.name.startswith('__'):
             users.append(item.name)
     
     if not users:
         print("ERROR: No user profiles found!")
-        print("Please create: ./profiles/your_name/your_role.py")
         return None, None, None
     
-    # Select user
     print(f"\nAvailable users:")
     for i, user in enumerate(users, 1):
         print(f"  {i}. {user}")
@@ -145,16 +127,13 @@ def select_profile():
     try:
         user_choice = int(input(f"\nSelect user (1-{len(users)}): ")) - 1
         if not 0 <= user_choice < len(users):
-            print("Invalid selection")
             return None, None, None
         
         selected_user = users[user_choice]
-        print(f"Selected user: {selected_user}")
+        print(f"✓ Selected user: {selected_user}")
     except (ValueError, KeyboardInterrupt):
-        print("Selection cancelled")
         return None, None, None
     
-    # Get available roles for selected user
     user_dir = profiles_dir / selected_user
     roles = []
     for item in user_dir.iterdir():
@@ -164,10 +143,8 @@ def select_profile():
     
     if not roles:
         print(f"ERROR: No role profiles found for {selected_user}")
-        print(f"Please create: ./profiles/{selected_user}/your_role.py")
         return None, None, None
     
-    # Select role
     print(f"\nAvailable roles for {selected_user}:")
     for i, (role_file, role_display) in enumerate(roles, 1):
         print(f"  {i}. {role_display}")
@@ -175,16 +152,14 @@ def select_profile():
     try:
         role_choice = int(input(f"\nSelect role (1-{len(roles)}): ")) - 1
         if not 0 <= role_choice < len(roles):
-            print("Invalid selection")
             return None, None, None
         
         selected_role_file, selected_role_display = roles[role_choice]
-        print(f"Selected role: {selected_role_display}")
+        print(f"✓ Selected role: {selected_role_display}\n")
         
         return selected_user, selected_role_file, selected_role_display
         
     except (ValueError, KeyboardInterrupt):
-        print("Selection cancelled")
         return None, None, None
 
 def load_profile_module(user, role_file):
@@ -194,7 +169,6 @@ def load_profile_module(user, role_file):
     if not profile_path.exists():
         raise FileNotFoundError(f"Profile not found: {profile_path}")
     
-    # Load the module dynamically
     spec = importlib.util.spec_from_file_location("selected_profile", profile_path)
     profile_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(profile_module)
@@ -203,14 +177,13 @@ def load_profile_module(user, role_file):
 
 def load_role_job_description(user, role_file):
     """Load job description specific to the selected role"""
-    # Try multiple possible locations for job descriptions
     possible_paths = [
         f"profiles/{user}/{role_file}_job_description.txt",
         f"profiles/{user}/job_descriptions/{role_file}.txt", 
         f"job_descriptions/{user}_{role_file}.txt",
         f"job_descriptions/{role_file}.txt",
-        "job_description.txt",  # fallback to global
-        "jd.txt"  # fallback to global
+        "job_description.txt",
+        "jd.txt"
     ]
     
     for path in possible_paths:
@@ -222,7 +195,6 @@ def load_role_job_description(user, role_file):
                         print(f"✓ Job Description loaded from: {path}")
                         return content
             except Exception as e:
-                print(f"Warning: Could not read {path}: {e}")
                 continue
     
     return ""
@@ -233,59 +205,50 @@ def show_startup_info():
     print("AI Interview Assistant - Initializing...")
     print("=" * 60)
     
-    # Profile selection
     user, role_file, role_display = select_profile()
     if not user or not role_file:
         print("No profile selected. Exiting...")
         sys.exit(1)
     
-    # Load the selected profile
     try:
-        print(f"\nLoading profile: {user} - {role_display}")
+        print(f"Loading profile: {user} - {role_display}")
         profile_module = load_profile_module(user, role_file)
         llm = profile_module.make_llm()
-        print("✓ Profile loaded successfully")
+        print("✓ Profile loaded successfully\n")
     except Exception as e:
         print(f"ERROR: Failed to load profile: {e}")
-        print("Make sure your profile file has a 'make_llm()' function")
         sys.exit(1)
     
-    # Load context files
-    print("\n--- Context Loading ---")
+    print("--- Context Loading ---")
     context = load_context()
     job_description = load_role_job_description(user, role_file)
     
     if context:
         print(f"✓ General context: {len(context.split())} words loaded")
     else:
-        print("⚠ No general context loaded (create my_context.txt)")
+        print("⚠ No general context loaded")
     
     if job_description:
         print(f"✓ Role-specific job description: {len(job_description.split())} words loaded")
     else:
         print("⚠ No role-specific job description found")
-        print(f"  Create: profiles/{user}/{role_file}_job_description.txt")
     
-    # Audio setup
     print("\n--- Audio Setup ---")
     device_pick = pick_system_audio_device(prefer_rate=48000)
     device_short = device_pick.name[:50] + "..." if len(device_pick.name) > 50 else device_pick.name
     print(f"Selected: {device_short}")
     print(f"Mode: {'Loopback' if device_pick.wasapi_loopback else 'Virtual Input'}")
     
-    # Model loading
     print("\n--- Model Loading ---")
     print("Loading Whisper...", end="", flush=True)
     model = load_whisper()
     print(" ✓")
+    print("LLM ready ✓")
     
-    print("LLM already loaded ✓")
-    
-    # Terminal info
     terminal_width = shutil.get_terminal_size().columns
     print(f"\n--- Display Setup ---")
     print(f"Terminal width: {terminal_width} columns")
-    print(f"Response width: {min(terminal_width - 4, 100)} columns (optimized for readability)")
+    print(f"Response width: {min(terminal_width - 4, 100)} columns")
     
     print(f"\n{'='*60}")
     print("READY FOR INTERVIEW")
@@ -322,7 +285,6 @@ def record_manual_control(device_index: int, samplerate: int, wasapi_loopback: b
         if recording.is_set():
             audio_queue.put(indata.copy())
     
-    # Setup audio stream
     if wasapi_loopback:
         stream_params = {
             'device': (None, device_index),
@@ -343,19 +305,16 @@ def record_manual_control(device_index: int, samplerate: int, wasapi_loopback: b
     
     try:
         with sd.InputStream(**stream_params):
-            # Wait for first ENTER to start
             input()
             print("🔴 RECORDING... (Press ENTER to stop)")
             recording.set()
             start_time = time.time()
             
-            # Wait for second ENTER to stop
             input()
             recording.clear()
             elapsed = time.time() - start_time
             print(f"⏹ Stopped ({elapsed:.1f}s)")
             
-            # Collect recorded audio
             frames = []
             while not audio_queue.empty():
                 frames.append(audio_queue.get())
@@ -363,7 +322,6 @@ def record_manual_control(device_index: int, samplerate: int, wasapi_loopback: b
             if not frames:
                 return np.zeros((1, 1), dtype=np.float32), elapsed
             
-            # Process audio
             audio = np.concatenate(frames, axis=0)
             if audio.ndim == 2 and audio.shape[1] > 1:
                 audio = np.mean(audio, axis=1, keepdims=True)
@@ -379,9 +337,7 @@ def record_manual_control(device_index: int, samplerate: int, wasapi_loopback: b
 def print_wrapped_response(llm, question: str, context: str, job_description: str, stop_generation: threading.Event):
     """Print response with proper word wrapping"""
     
-    # Initialize word wrapper
     wrapper = WordWrapper(width=min(shutil.get_terminal_size().columns - 4, 100))
-    
     response_text = ""
     word_count = 0
     
@@ -390,38 +346,32 @@ def print_wrapped_response(llm, question: str, context: str, job_description: st
             if stop_generation.is_set():
                 break
                 
-            # Add token to wrapper and get any complete lines
             wrapped_output = wrapper.add_token(token)
             
-            # Print wrapped lines immediately
             if wrapped_output:
                 print(wrapped_output, end="", flush=True)
             
             response_text += token
         
-        # Flush any remaining content
         if not stop_generation.is_set():
             final_output = wrapper.flush()
             if final_output:
                 print(final_output, end="", flush=True)
                 
-            # Add final newline if needed
             if not response_text.endswith('\n'):
                 print()
         
-        # Count words for summary
         word_count = len(response_text.split())
-        
         return response_text, word_count
         
     except Exception as e:
         print(f"\n⚠ LLM error: {e}")
-        fallback = "Based on my experience, I can address this technical challenge using proven methodologies and best practices from my background."
+        fallback = "Based on my experience, I can address this technical challenge using proven methodologies."
         print(textwrap.fill(fallback, width=wrapper.width))
         return fallback, len(fallback.split())
 
 def run_interview_session(device_pick, model, llm, context, job_description):
-    """Enhanced interview loop with word wrapping"""
+    """Interview loop with space interrupt"""
     
     question_count = 0
     
@@ -429,7 +379,6 @@ def run_interview_session(device_pick, model, llm, context, job_description):
         while True:
             question_count += 1
             
-            # Manual recording control
             print(f"\n[Q{question_count}] Press ENTER to start recording...")
             
             try:
@@ -441,27 +390,30 @@ def run_interview_session(device_pick, model, llm, context, job_description):
                 
                 if elapsed < 0.5:
                     print("⚠ Too short, try again")
+                    question_count -= 1
                     continue
                     
             except Exception as e:
                 print(f"⚠ Recording failed: {e}")
+                question_count -= 1
                 continue
 
-            # Fast transcription
-            print("⚡ Transcribing...")
+            print("⚡ Transcribing...", end="", flush=True)
+            transcribe_start = time.time()
             text = transcribe_chunk(model, audio, device_pick.samplerate)
+            transcribe_time = time.time() - transcribe_start
+            print(f" done ({transcribe_time:.1f}s)")
             
             if not text or text == "(no speech detected)":
                 print("⚠ No speech detected")
+                question_count -= 1
                 continue
                 
-            # Show question with wrapping
             print(f"\n🎤 QUESTION:")
             print(textwrap.fill(text, width=min(shutil.get_terminal_size().columns - 4, 100)))
             print(f"\n🤖 RESPONSE:")
             print("-" * min(shutil.get_terminal_size().columns - 4, 100))
             
-            # Response generation with interrupt and word wrapping
             stop_generation = threading.Event()
             
             def watch_for_space():
@@ -476,13 +428,11 @@ def run_interview_session(device_pick, model, llm, context, job_description):
                                 return
                         time.sleep(0.01)
                 except ImportError:
-                    # For non-Windows systems, you could implement alternative interrupt handling
                     pass
 
             interrupt_thread = threading.Thread(target=watch_for_space, daemon=True)
             interrupt_thread.start()
             
-            # Generate wrapped response
             response_text, word_count = print_wrapped_response(
                 llm, text, context, job_description, stop_generation
             )
@@ -493,7 +443,7 @@ def run_interview_session(device_pick, model, llm, context, job_description):
             print("-" * min(shutil.get_terminal_size().columns - 4, 100))
 
     except KeyboardInterrupt:
-        print(f"\n\nSession ended. Answered {question_count-1} questions.")
+        print(f"\n\nSession ended. Answered {question_count} questions.")
 
 def main():
     try:
@@ -501,6 +451,8 @@ def main():
         run_interview_session(device_pick, model, llm, context, job_description)
     except Exception as e:
         print(f"Error: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()

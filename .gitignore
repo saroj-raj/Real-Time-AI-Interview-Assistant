@@ -193,11 +193,20 @@ profiles/*/
 # Context files with personal information
 my_context.txt
 personal_context.txt
+*_context.txt
 
 # Job descriptions (may contain confidential company info)
 jd.txt
 job_description.txt
+*_job_description.txt
 job_descriptions/
+
+# Backup and temporary fix files
+*.backup
+*_backup.py
+complete_fix.py
+debug_*.py
+fix_*.py
 
 # Model files and large binaries
 *.bin
