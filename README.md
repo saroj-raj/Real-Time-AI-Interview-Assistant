@@ -8,7 +8,8 @@ A comprehensive AI-powered interview practice system that provides personalized,
 > - **[ROADMAP.md](ROADMAP.md)** - Comprehensive 5-phase development plan (Frontend → Backend → Quality → Deployment → Mobile)
 > - **[RULES.md](RULES.md)** - Development guidelines and best practices for contributors
 > - **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture, data flow, and technical design
-> - **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute (coming soon)
+> - **[QUICKSTART.md](QUICKSTART.md)** - Step-by-step setup guide for Phase 1 frontend development
+> - **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to the project
 
 ## Features
 
