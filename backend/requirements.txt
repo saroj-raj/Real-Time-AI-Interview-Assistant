@@ -1,0 +1,31 @@
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+websockets==13.1
+python-multipart==0.0.9
+firebase-admin==6.5.0
+groq==0.11.0
+python-dotenv==1.0.1
+pydantic==2.9.2
+pydantic-settings==2.5.2
+requests==2.32.3
+
+# Audio processing
+openai-whisper==20231117
+pyannote.audio==3.1.1
+soundfile==0.12.1
+librosa==0.10.2
+webrtcvad==2.0.10
+
+# Vector DB
+pinecone-client==5.0.1
+chromadb==0.5.11
+
+# ML/AI
+langchain==0.3.7
+langchain-openai==0.2.7
+langchain-community==0.3.5
+sentence-transformers==3.2.1
+
+# Document parsing
+PyPDF2==3.0.1
+python-docx==1.1.2
