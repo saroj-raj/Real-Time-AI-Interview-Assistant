@@ -5,6 +5,7 @@ from typing import List, Optional
 import os
 import logging
 from dotenv import load_dotenv
+import re
 import asyncio
 
 # Import custom modules
@@ -34,14 +35,42 @@ answer_generator = AnswerGenerator()
 firebase_service = FirebaseService()
 audio_processor = AudioProcessor()
 
-# CORS Configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(","),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS Configuration (robust parsing + optional regex)
+# Supports:
+# - ALLOWED_ORIGINS: comma/whitespace separated list, e.g. "https://app.vercel.app, http://localhost:3000"
+# - ALLOWED_ORIGIN_REGEX: optional single regex pattern to allow dynamic subdomains
+allowed_origin_regex = os.getenv("ALLOWED_ORIGIN_REGEX", "").strip()
+origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+
+# Normalize separators and trim stray whitespace/CRLF
+def _normalize_origin(origin: str) -> str:
+    # Trim whitespace/CRLF and remove any trailing slashes to avoid CORS mismatches
+    return origin.strip().rstrip("/")
+
+origins_list = [
+    _normalize_origin(o)
+    for o in re.split(r"[,\s]+", origins_raw.strip())
+    if o.strip()
+]
+
+if allowed_origin_regex:
+    logger.info(f"CORS configured with regex: {allowed_origin_regex}")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=allowed_origin_regex,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    logger.info(f"CORS allowed origins: {origins_list}")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Pydantic Models
 class TranscriptRequest(BaseModel):

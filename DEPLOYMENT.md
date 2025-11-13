@@ -90,9 +90,20 @@ git push -u origin main
 ### Step 2: Update Backend CORS
 
 Go back to Render and update the `ALLOWED_ORIGINS` environment variable:
+
 ```
 ALLOWED_ORIGINS=https://your-app.vercel.app
 ```
+
+Tip: You can now also use a regex instead of a list. Set `ALLOWED_ORIGIN_REGEX` to allow a pattern (set one or the other):
+
+```
+ALLOWED_ORIGIN_REGEX=^https://[a-z0-9-]+\.vercel\.app$
+```
+
+Only use regex if you truly need multiple dynamic subdomains. Prefer an explicit list for tighter security.
+
+Note: Do not include a trailing slash in origins (e.g., use `https://your-app.vercel.app`, not `https://your-app.vercel.app/`).
 
 ---
 
@@ -177,8 +188,12 @@ Expected response:
 ### Frontend Issues
 
 **Firebase auth not working**:
-- Check authorized domains in Firebase Console
-- Verify environment variables
+- Check authorized domains in Firebase Console (Authentication → Settings → Authorized domains). Add your exact Vercel domain, e.g. `your-app.vercel.app`.
+- Verify environment variables on Vercel have no trailing spaces or newlines. Hidden CR/LF characters can break Firebase’s iframe URL and cause errors like `Illegal url for new iframe ... %0D%0A`.
+   - Re-enter these values carefully:
+      - `NEXT_PUBLIC_FIREBASE_API_KEY`
+      - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` (looks like `your-project.firebaseapp.com`)
+   - After saving, redeploy the frontend.
 
 **WebSocket connection failed**:
 - Update `NEXT_PUBLIC_API_URL` with correct backend URL
