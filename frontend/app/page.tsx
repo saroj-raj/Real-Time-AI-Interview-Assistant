@@ -12,7 +12,7 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 tracking-tight">
             AI Interview Assistant
           </h1>
-          <p className="text-xl md:text-2xl text-gray-800 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-black max-w-2xl mx-auto">
             Practice interviews with real-time AI feedback and improve your chances of landing your dream job
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -35,7 +35,7 @@ export default function Home() {
             <CardHeader>
               <Mic className="h-10 w-10 text-blue-600 mb-2" />
               <CardTitle>Voice Recording</CardTitle>
-              <CardDescription className="text-gray-800">
+              <CardDescription className="text-black">
                 Record your answers with high-quality audio capture
               </CardDescription>
             </CardHeader>
@@ -45,7 +45,7 @@ export default function Home() {
             <CardHeader>
               <Brain className="h-10 w-10 text-blue-600 mb-2" />
               <CardTitle>AI Feedback</CardTitle>
-              <CardDescription className="text-gray-800">
+              <CardDescription className="text-black">
                 Get instant, personalized feedback powered by advanced LLMs
               </CardDescription>
             </CardHeader>
@@ -55,7 +55,7 @@ export default function Home() {
             <CardHeader>
               <Clock className="h-10 w-10 text-blue-600 mb-2" />
               <CardTitle>Real-Time Analysis</CardTitle>
-              <CardDescription className="text-gray-800">
+              <CardDescription className="text-black">
                 See transcriptions and feedback as you speak
               </CardDescription>
             </CardHeader>
@@ -65,7 +65,7 @@ export default function Home() {
             <CardHeader>
               <TrendingUp className="h-10 w-10 text-blue-600 mb-2" />
               <CardTitle>Track Progress</CardTitle>
-              <CardDescription className="text-gray-800">
+              <CardDescription className="text-black">
                 Review past sessions and monitor your improvement
               </CardDescription>
             </CardHeader>
@@ -81,7 +81,7 @@ export default function Home() {
                 <span className="text-2xl font-bold text-blue-600">1</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Record Your Answer</h3>
-              <p className="text-gray-800">
+              <p className="text-black">
                 Click the microphone button and answer the interview question naturally
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function Home() {
                 <span className="text-2xl font-bold text-blue-600">2</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Real-Time Transcription</h3>
-              <p className="text-gray-800">
+              <p className="text-black">
                 Watch as your speech is transcribed in real-time using Whisper AI
               </p>
             </div>
@@ -101,7 +101,7 @@ export default function Home() {
                 <span className="text-2xl font-bold text-blue-600">3</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Get AI Feedback</h3>
-              <p className="text-gray-800">
+              <p className="text-black">
                 Receive instant, personalized feedback to improve your responses
               </p>
             </div>
@@ -117,7 +117,7 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-16 text-center text-gray-800">
+        <footer className="mt-16 text-center text-black">
           <p>Built with Next.js, TypeScript, and AI</p>
         </footer>
       </main>
