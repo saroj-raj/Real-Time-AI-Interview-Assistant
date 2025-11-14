@@ -335,4 +335,5 @@ yarn-error.log*
 *.tsbuildinfo
 
 # Local Netlify folder
-.netlify
+.netlifyfirebase-credentials.json
+.vercel

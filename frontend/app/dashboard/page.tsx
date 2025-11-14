@@ -20,16 +20,29 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  useEffect(() => {
+    console.log('Dashboard mounted, user from store:', user);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const loadUserData = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found, skipping data load');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Loading data for user:', user.uid);
 
     try {
       // Load resumes
+      console.log('Querying resumes...');
       const resumesQuery = query(
         collection(db, 'resumes'),
         where('userId', '==', user.uid)
       );
       const resumesSnapshot = await getDocs(resumesQuery);
+      console.log('Resumes found:', resumesSnapshot.docs.length);
       const resumesData = resumesSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -39,11 +52,13 @@ function DashboardPage() {
       setResumes(resumesData);
 
       // Load job descriptions
+      console.log('Querying job descriptions...');
       const jdsQuery = query(
         collection(db, 'jobDescriptions'),
         where('userId', '==', user.uid)
       );
       const jdsSnapshot = await getDocs(jdsQuery);
+      console.log('Job descriptions found:', jdsSnapshot.docs.length);
       const jdsData = jdsSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -51,9 +66,14 @@ function DashboardPage() {
         updatedAt: doc.data().updatedAt?.toDate() || new Date(),
       })) as JobDescription[];
       setJobDescriptions(jdsData);
+      
+      console.log('Data loaded successfully');
     } catch (error) {
       console.error('Error loading user data:', error);
+      // Show error in UI instead of just logging
+      alert(`Error loading data: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
