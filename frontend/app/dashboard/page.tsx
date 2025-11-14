@@ -87,15 +87,24 @@ function DashboardPage() {
 
   const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file || !user) {
+      console.log('No file selected or no user');
+      return;
+    }
+
+    console.log('Starting resume upload:', file.name, file.size, 'bytes');
+    setLoading(true);
 
     try {
       // Upload file to Firebase Storage
+      console.log('Uploading to Firebase Storage...');
       const storageRef = ref(storage, `resumes/${user.uid}/${Date.now()}_${file.name}`);
       await uploadBytes(storageRef, file);
       const fileUrl = await getDownloadURL(storageRef);
+      console.log('File uploaded successfully:', fileUrl);
 
       // Create resume document in Firestore
+      console.log('Creating Firestore document...');
       const resumeData = {
         userId: user.uid,
         name: file.name,
@@ -111,10 +120,18 @@ function DashboardPage() {
       };
 
       await addDoc(collection(db, 'resumes'), resumeData);
+      console.log('Resume saved to Firestore');
+      
+      // Reload data
       await loadUserData();
+      alert(`Resume "${file.name}" uploaded successfully!`);
     } catch (error) {
       console.error('Error uploading resume:', error);
-      alert('Failed to upload resume. Please try again.');
+      alert(`Failed to upload resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+      // Reset the input so the same file can be uploaded again if needed
+      e.target.value = '';
     }
   };
 
